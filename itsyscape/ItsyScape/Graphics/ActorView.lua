@@ -134,8 +134,8 @@ function ActorView:new(actor, actorID)
 	self.layer = false
 
 	self.animations = {}
-	self._onAnimationPlayed = function(_, slot, priority, animation)
-		self:playAnimation(slot, animation, priority, 0)
+	self._onAnimationPlayed = function(_, slot, priority, animation, time)
+		self:playAnimation(slot, animation, priority, time)
 	end
 	actor.onAnimationPlayed:register(self._onAnimationPlayed)
 

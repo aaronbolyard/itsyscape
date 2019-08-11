@@ -25,8 +25,8 @@ function Event:serialize(action, t)
 	self.data = serpent.dump(e, { sortkeys = true })
 end
 
-function Event:send(player)
-	Class.ABSTRACT()
+function Event:send(player, channel)
+	player:getPeer():send(self.data, channel)
 end
 
 function Metatable.__eq(a, b)

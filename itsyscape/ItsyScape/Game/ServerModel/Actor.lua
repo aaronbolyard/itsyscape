@@ -289,16 +289,16 @@ function ServerActor:getActions(scope)
 	end
 end
 
-function ServerActor:poke(action, scope)
+function ServerActor:poke(action, scope, player)
 	if self.resource then
-		local player = self.game:getPlayer():getActor():getPeep()
+		local playerPeep = player:getActor():getPeep()
 		local peep = self:getPeep()
 		local s = Utility.performAction(
 			self.game,
 			self.resource,
 			action,
 			scope,
-			player:getState(), player, peep)
+			playerPeep:getState(), playerPeep, peep)
 		local m = Utility.Peep.getMapObject(peep)
 		if not s and m then
 			Utility.performAction(
@@ -306,7 +306,7 @@ function ServerActor:poke(action, scope)
 				m,
 				action,
 				scope,
-				player:getState(), player, peep)
+				playerPeep:getState(), playerPeep, peep)
 		end
 	end
 end

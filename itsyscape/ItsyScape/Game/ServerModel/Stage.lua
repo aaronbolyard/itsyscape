@@ -50,6 +50,13 @@ function ServerStage:preloadInstance(path)
 end
 
 function ServerStage:connectInstance(instance)
+	self.state[instance] = {
+		map = {},
+		mapTransform = {},
+		actors = {},
+		props = {}
+	}
+
 	instance.onLoadMap:register(self._onLoadMap, self)
 	instance.onUnloadMap:register(self._onUnloadMap, self)
 	instance.onMapModified:register(self._onMapModified, self)
@@ -82,43 +89,22 @@ end
 
 function ServerStage:_onLoadMap(instance, map, layer, tileSetID, filename)
 	local state = self.state[instance]
-	state.map[layer] = RPC(
-		'onLoadMap',
-		0,
-		layer,
-		tileSetID,
-		filename)
+	state:onLoadMap(map, layer, tileSetID, filename)
 end
 
 function ServerStage:_onUnloadMap(instance, map, layer)
 	local state = self.state[instance]
-	state.map[layer] = RPC(
-		'onUnloadMap',
-		0,
-		layer)
+	state:onUnloadMap(map, layer)
 end
 
 function ServerStage:_onMapModified(instance, map, layer)
 	local state = self.state[instance]
-	if map then
-		state.map[layer] = RPC(
-			'onMapModified',
-			0,
-			map:toString(),
-			layer)
-	end
+	state:onMapModified(map, layer)
 end
 
 function ServerStage:_onMapMoved(instance, layer, position, rotation, scale)
 	local state = self.state[instance]
-	if map then
-		state.map[layer] = RPC(
-			'onMapMoved',
-			layer,
-			{ position.x, position.y, position.z },
-			{ rotation.x, rotation.y, rotation.z, rotation.w },
-			{ scale.x, scale.y, scale.z })
-	end
+	state:onMapMoved(layer, position, rotation, scale)
 end
 
 function ServerStage:_onActorSpawned(instance, actorID, actor)
@@ -532,6 +518,12 @@ function ServerStage:getNewLayer()
 	self.currentLayerID = self.currentLayerID + 1
 
 	return result
+end
+
+function ServerStage:takeItem(player, i, j, layer, ref)
+	local instanceName = player:getActor():getPeep():getLayerName()
+	local instance = self.instances[instanceName]
+	instance:takeItem(player, i, j, layer, ref)
 end
 
 function ServerStage:tick()

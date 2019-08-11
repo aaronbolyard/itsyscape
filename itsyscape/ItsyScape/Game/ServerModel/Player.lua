@@ -28,6 +28,7 @@ function ServerPlayer:new(game, stage)
 	self.stage = stage
 	self.actor = false
 	self.peer = false
+	self.state = {}
 end
 
 function ServerPlayer:getPeer()
@@ -36,6 +37,10 @@ end
 
 function ServerPlayer:setPeer(value)
 	self.peer = value or false
+end
+
+function ServerPlayer:getState()
+	return self.state
 end
 
 function ServerPlayer:spawn()

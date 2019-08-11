@@ -7,6 +7,7 @@
 -- License, v. 2.0. If a copy of the MPL was not distributed with this
 -- file, You can obtain one at http://mozilla.org/MPL/2.0/.
 --------------------------------------------------------------------------------
+local BaseApplication = require "ItsyScape.BaseApplication"
 local Class = require "ItsyScape.Common.Class"
 local Tween = require "ItsyScape.Common.Math.Tween"
 local Vector = require "ItsyScape.Common.Math.Vector"
@@ -71,7 +72,7 @@ end
 
 local FONT = love.graphics.getFont()
 
-local Application = Class()
+local Application = Class(BaseApplication)
 Application.CLICK_NONE = 0
 Application.CLICK_ACTION = 1
 Application.CLICK_WALK = 2
@@ -101,8 +102,6 @@ function Application:new()
 
 	self.game.onQuit:register(self.quitGame, self)
 
-	self.times = {}
-
 	self.gameView:getRenderer():setCamera(self.camera)
 
 	self.showDebug = true
@@ -117,22 +116,6 @@ function Application:new()
 	end
 
 	self.paused = false
-end
-
-function Application:measure(name, func, ...)
-	local before = love.timer.getTime()
-	func(...)
-	local after = love.timer.getTime()
-
-	local index
-	if not self.times[name] then
-		index = #self.times + 1
-		self.times[name] = index
-	else
-		index = self.times[name]
-	end
-
-	self.times[index] = { value = after - before, name = name }
 end
 
 function Application:initialize()

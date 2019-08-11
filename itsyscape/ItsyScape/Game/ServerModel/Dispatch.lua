@@ -10,15 +10,10 @@
 local enet = require "enet"
 local Class = require "ItsyScape.Common.Class"
 local PlayerStorage = require "ItsyScape.Game.PlayerStorage"
+local Channel = require "ItsyScape.Game.ServerModel.Channel"
 
 local Dispatch = Class()
 Dispatch.PORT = 2017
-
-Dispatch.CHANNEL_GAME   = 0
-Dispatch.CHANNEL_PLAYER = 1
-Dispatch.CHANNEL_STAGE  = 2
-Dispatch.CHANNEL_ACTOR  = 3
-Dispatch.CHANNEL_PROP   = 4
 
 function Dispatch:new(game)
 	self.game = game
@@ -75,15 +70,15 @@ end
 function Dispatch:dispatch(peer, event)
 	local data = event.data
 
-	if data._channel = Dispatch.CHANNEL_GAME then
+	if data._channel = Channel.CHANNEL_GAME then
 		self:dispatchGame(peer, event)
-	elseif data._channel = Dispatch.CHANNEL_PLAYER then
+	elseif data._channel = Channel.CHANNEL_PLAYER then
 		self:dispatchPlayer(peer, event)
-	elseif data._channel = Dispatch.CHANNEL_STAGE then
+	elseif data._channel = Channel.CHANNEL_STAGE then
 		self:dispatchStage(peer, event)
-	elseif data._channel = Dispatch.CHANNEL_ACTOR then
+	elseif data._channel = Channel.CHANNEL_ACTOR then
 		self:dispatchActor(peer, event)
-	elseif data._channel = Dispatch.CHANNEL_PROP then
+	elseif data._channel = Channel.CHANNEL_PROP then
 		self:dispatchProp(peer, event)
 	end
 end
@@ -111,6 +106,8 @@ function Dispatch.Game:disconnect(game, id, peer)
 	local player = self.players[peer:connect_id()]
 	if player then
 		player:poof()
+
+		self.players[peer:connect_id()] = nil
 	end
 end
 
@@ -132,6 +129,21 @@ function Dispatch.Player:walk(game, id, peer, i, j)
 		player:walk(i, j)
 	end
 end
+
+function Dispatch.Stage = {}
+function Dispatch.Stage:takeItem(game, id, peer, i, j, layer, ref)
+	i = tonumber(i)
+	j = tonumber(j)
+	layer = tonumber(layer)
+	ref = tonumber(ref)
+
+	local player = self.players[peer:connect_id()]
+	if player and i and j and layer and ref then
+		game:getStage():takeItem(player, i, j, layer, ref)
+	end
+end
+
+function Dispatch.
 
 function Dispatch:dispatchGame(peer, event)
 	if event.type == 'RPC' then
