@@ -43,6 +43,50 @@ function ClientStage.RPC:onMapMoved(layer, position, rotation, scale)
 	self:onMapMoved(layer, position, rotation, scale)
 end
 
+function ClientStage.RPC:onDropItem(item, tile, position)
+	position = Vector(unpack(position))
+
+	self:onDropItem(item, tile, position)
+end
+
+function ClientStage.RPC:onTakeItem(item)
+	self:onTakeItem(item)
+end
+
+function ClientStage.RPC:onWaterFlood(key, water, layer)
+	self:onWaterFlood(key, water, layer)
+end
+
+function ClientStage.RPC:onWaterDrain(key)
+	self:onWaterDrain(key)
+end
+
+function ClientStage.RPC:onForecast(key, id, props)
+	self:onForecast(key, id, props)
+end
+
+function ClientStage.RPC:onPlayMusic(track, song)
+	self:onPlayMusic(track, song)
+end
+
+function ClientStage.RPC:onStopMusic(track)
+	self:onStopMusic(track)
+end
+
+function InstanceState:onProjectile(projectileID, source, destination)
+	-- TODO
+end
+
+function InstanceState:onDecorate(key, decoration, layer, filename)
+	if filename then
+		self:onDecorate(key, Decoration(filename), layer)
+	else
+		local chunk = assert(loadstring(data))
+		local result = setfenv(chunk, {})() or {}
+		self:onDecorate(key, result, layer)
+	end
+end
+
 function ClientStage.RPC:tick()
 	self.game:onChannelTick(Channel.CHANNEL_STAGE)
 end

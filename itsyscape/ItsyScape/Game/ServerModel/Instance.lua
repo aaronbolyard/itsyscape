@@ -616,8 +616,9 @@ function Instance:loadMapResource(filename, args)
 		local group = item:match("(.*)%.ldeco$")
 		if group then
 			local key = directoryPath .. "/Decorations/" .. item
-			local decoration = Decoration(directoryPath .. "/Decorations/" .. item)
-			self:decorate(key, decoration, layer)
+			local filename = key
+			local decoration = Decoration(filename)
+			self:decorate(key, decoration, layer, filename)
 		end
 	end
 

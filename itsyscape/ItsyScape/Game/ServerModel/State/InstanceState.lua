@@ -8,7 +8,10 @@
 -- file, You can obtain one at http://mozilla.org/MPL/2.0/.
 --------------------------------------------------------------------------------
 local Class = require "ItsyScape.Common.Class"
+local Vector = require "ItsyScape.Common.Math.Vector"
 local RPC = require "ItsyScape.Game.ServerModel.RPC"
+local Actor = require "ItsyScape.Game.Model.Actor"
+local Prop = require "ItsyScape.Game.Model.Prop"
 local Channel = require "ItsyScape.Game.ServerModel.Channel"
 
 local InstanceState = Class()
@@ -17,6 +20,10 @@ InstanceState.MapState = Class()
 function InstanceState.MapState:new()
 	self.maps = {}
 	self.transforms = {}
+	self.items = {}
+	self.water = {}
+	self.forecast = {}
+	self.projectiles = {}
 end
 
 function InstanceState.MapState:onLoadMap(layer, tileSetID, filename)
@@ -53,6 +60,103 @@ function InstanceState.MapState:onUnloadMap(layer)
 	self.transforms[layer] = nil
 end
 
+function InstanceState.MapState:onDropItem(instance, item, tile, position)
+	self.items[item.ref] = {
+		item = { ref = item.ref, id = item.id, noted = item.noted },
+		rpc = RPC('onDropItem',
+			0,
+			{ ref = item.ref, id = item.id, noted = item.noted },
+			{ i = tile.i, j = tile.j, layer = tile.layer },
+			{ position.x, position.y, position.z })
+	}
+end7
+
+function InstanceState.MapState:onTakeItem(item)
+	self.items[item.ref] = nil
+end
+
+function InstanceState.MapState:onWaterFlood(key, water, layer)
+	self.water[key] = {
+		layer = layer,
+		rpc = RPC('onWaterFlood',
+			0,
+			key,
+			water,
+			layer)
+	}
+end
+
+function InstanceState.MapState:onWaterDrain(key)
+	self.water[key] = nil
+end
+
+function InstanceState.MapState:onForecast(key, id, props)
+	if not props then
+		self.forecast[key] = nil
+	else
+		self.forecast[key] = RPC(
+			'onForecast',
+			0,
+			key,
+			id,
+			props)
+	end
+end
+
+function InstanceState.MapState:onPlayMusic(track, song)
+	if not song then
+		self.music[track] = nil
+	else
+		self.music[track] = RPC(
+			'onPlayMusic',
+			0,
+			track,
+			song)
+	end
+end
+
+function InstanceState.MapState:onStopMusic(track)
+	self.music[track] = nil
+end
+
+function InstanceState.MapState:onProjectile(projectileID, source, destination)
+	local function marshalTarget(t)
+		if t:isCompatibleType(Actor) then
+			return { type = 'actor', id = t:getID() }
+		elseif t:isCompatibleType(Prop) then
+			return { type = 'prop', id = t:getID() }
+		elseif t:isCompatibleType(Vector) then
+			return { type = 'vector', t:get() }
+		else
+			return { type = 'nil' }
+		end
+	end
+
+	table.insert(
+		self.projectiles,
+		RPC('onProjectile',
+			0,
+			projectileID,
+			marshalTarget(source),
+			marshalTarget(destination)))
+end
+
+function InstanceState.MapState:onDecorate(key, decoration, layer, filename)
+	if not decoration then
+		self.decorations[key] = nil
+	else
+		if filename then
+			self.decorations[key] = RPC('onDecorate', 0, key, nil, layer, filename)
+		else
+			self.decorations[key] = RPC('onDecorate', 0, key, decoration:toString(), layer)
+		end
+	end
+end
+
+function InstanceState.MapState:tick()
+	self.projectiles = {}
+end
+
 function InstanceState.MapState:send(player)
 	local playerState = player:getState()
 	local maps = playerState.maps
@@ -74,7 +178,7 @@ function InstanceState.MapState:send(player)
 		end
 
 		for i = 1, #unloaded do
-			maps[layer] = nil
+			maps[unloaded[i]] = nil
 		end
 	end
 
@@ -109,7 +213,7 @@ function InstanceState.MapState:send(player)
 		end
 	end
 
-	-- Lastly, update the map transforms.
+	-- Next, update the map transforms.
 	for layer, transform in pairs(self.transforms) do
 		local otherState = maps[layer]
 		if not otherState then
@@ -120,6 +224,131 @@ function InstanceState.MapState:send(player)
 		if otherState.transform ~= transform then
 			transform:send(player, Channel.CHANNEL_STAGE)
 		end
+	end
+
+	-- Next, handle music. Stop any stale music and start any new music.
+	do
+		local music = playerState.music
+		if not music then
+			music = {}
+			playerState.music = music
+		end
+
+		local unloaded = {}
+		for key, state in pairs(music) do
+			if not self.music[key] then
+				local event = RPC('onStopMusic', 0, key)
+				event:send(player, Channel.CHANNEL_STAGE)
+				table.insert(unloaded, key)
+			end
+		end
+
+		for i = 1, #unloaded do
+			music[unloaded[i]] = nil
+		end
+
+		for key, selfState in pairs(self.music) do
+			local otherState = music[key]
+			if not otherState or otherState ~= selfState then
+				selfState:send(player, Channel.CHANNEL_STAGE)
+				music[key] = selfState
+			end
+		end
+	end
+
+	-- Next, handle water.
+	do
+		local water = playerState.water
+		if not water then
+			water = {}
+			playerState.water = water
+		end
+
+		local unloaded = {}
+		for key, state in pairs(water) do
+			if not self.water[key] then
+				local event = RPC('onWaterDrain', 0, key, state.layer)
+				event:send(player, Channel.CHANNEL_STAGE)
+				table.insert(unloaded, key)
+			end
+		end
+
+		for i = 1, #unloaded do
+			water[unloaded[i]] = nil
+		end
+
+		for key, selfState in pairs(self.water) do
+			local otherState = water[key]
+			if not otherState or otherState.rpc ~= selfState.rpc then
+				selfState.rpc:send(player, Channel.CHANNEL_STAGE)
+				water[key] = selfState
+			end
+		end
+	end
+
+	-- Next, items.
+	do
+		local items = playerState.items
+		if not items then
+			items = {}
+			playerState.items = items
+		end
+
+		local unloaded = {}
+		for ref, state in pairs(items) do
+			if not self.items[ref] then
+				local event = RPC('onTakeItem', 0, state.item)
+				event:send(player, Channel.CHANNEL_STAGE)
+				table.insert(unloaded, ref)
+			end
+		end
+
+		for i = 1, #unloaded do
+			items[unloaded[i]] = nil
+		end
+
+		for ref, selfState in pairs(self.items) do
+			local otherState = items[ref]
+			if not otherState or otherState.rpc ~= selfState.rpc then
+				selfState.rpc:send(player, Channel.CHANNEL_STAGE)
+				items[ref] = selfState
+			end
+		end
+	end
+
+	-- Next, decorations.
+	do
+		local decorations = playerState.decorations
+		if not decorations then
+			decorations = {}
+			playerState.decorations = decorations
+		end
+
+		local unloaded = {}
+		for key, state in pairs(decorations) do
+			if not self.decorations[key] then
+				local event = RPC('onDecorate', 0, key, nil)
+				event:send(player, Channel.CHANNEL_STAGE)
+				table.insert(unloaded, key)
+			end
+		end
+
+		for i = 1, #unloaded do
+			decorations[unloaded[i]] = nil
+		end
+
+		for key, selfState in pairs(self.decorations) do
+			local otherState = decorations[key]
+			if not otherState or otherState ~= selfState then
+				selfState:send(player, Channel.CHANNEL_STAGE)
+				decorations[key] = selfState
+			end
+		end
+	end
+
+	-- Next, handle projectiles.
+	for i = 1, #self.projectiles do
+		self.projectiles[i]:send(player, Channel.CHANNEL_STAGE)
 	end
 
 	RPC('tick', 0):send(player, Channel.CHANNEL_STAGE)
@@ -467,6 +696,42 @@ function InstanceState:onMapMoved(layer, position, rotation, scale)
 	self.map:onMapMoved(layer, position, rotation, scale)
 end
 
+function InstanceState:onDropItem(instance, item, tile, position)
+	self.map:onDropItem(instance, item, tile, position)
+end
+
+function InstanceState:onTakeItem(item)
+	self.map:onTakeItem(item)
+end
+
+function InstanceState:onWaterFlood(key, water, layer)
+	self.map:onWaterFlood(key, water, layer)
+end
+
+function InstanceState:onWaterDrain(key)
+	self.map:onWaterDrain(key)
+end
+
+function InstanceState:onForecast(key, id, props)
+	self.map:onForecast(key, id, props)
+end
+
+function InstanceState:onPlayMusic(track, song)
+	self.map:onPlayMusic(track, song)
+end
+
+function InstanceState:onStopMusic(track)
+	self.map:onStopMusic(track)
+end
+
+function InstanceState:onProjectile(projectileID, source, destination)
+	self.map:onProjectile(projectileID, source, destination)
+end
+
+function InstanceState:onDecorate(key, decoration, layer, filename)
+	self.map:onDecorate(key, decoration, layer, filename)
+end
+
 function InstanceState:onActorSpawned(actorID, actor)
 	local actor = InstanceState.ActorState()
 	actor:onSpawn(actorID)
@@ -560,6 +825,8 @@ function InstanceState:tick()
 	for i = 1, #deadActors do
 		self.actors[deadActors[i]] = nil
 	end
+
+	self.map:tick()
 end
 
 return InstanceState
