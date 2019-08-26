@@ -289,6 +289,15 @@ function ServerActor:getActions(scope)
 	end
 end
 
+function ServerActor:getActionSourceID()
+	local mapObject = Utility.Peep.getMapObject(self.peep)
+	if mapObject then
+		return mapObject.id.value
+	end
+
+	return self.resource.id.value
+end
+
 function ServerActor:poke(action, scope, player)
 	if self.resource then
 		local playerPeep = player:getActor():getPeep()

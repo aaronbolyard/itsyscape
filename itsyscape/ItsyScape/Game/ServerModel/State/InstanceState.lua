@@ -29,13 +29,6 @@ function InstanceState.MapState:onLoadMap(layer, tileSetID, filename)
 	}
 end
 
-function InstanceState.MapState:onUnloadMap(layer)
-	local map = self.maps[layer]
-	if map then
-		map.rpc = RPC('onUnloadMap', layer)
-	end
-end
-
 function InstanceState.MapState:onMapModified(layer, map)
 	local map = self.maps[layer]
 	if not map then
@@ -75,7 +68,7 @@ function InstanceState.MapState:send(player)
 		for layer, state in pairs(maps) do
 			if not self.maps[layer] then
 				local event = RPC('onUnloadMap', layer)
-				event:send(player)
+				event:send(player, Channel.CHANNEL_STAGE)
 				table.insert(unloaded, layer)
 			end
 		end
@@ -90,11 +83,11 @@ function InstanceState.MapState:send(player)
 		local otherState = maps[layer]
 		if not otherState then
 			if selfState.load then
-				selfState.load:send(player)
+				selfState.load:send(player, Channel.CHANNEL_STAGE)
 			end
 
 			if selfState.modify then
-				selfState.modify:send(player)
+				selfState.modify:send(player, Channel.CHANNEL_STAGE)
 			end
 
 			otherState = {
@@ -105,12 +98,12 @@ function InstanceState.MapState:send(player)
 			maps[layer]= otherState
 		else
 			if otherState.load ~= selfState.load then
-				selfState.load:send(player)
+				selfState.load:send(player, Channel.CHANNEL_STAGE)
 				otherState.load = selfState.load
 			end
 
 			if otherState.modify ~= selfState.modify then
-				selfState.modify:send(player)
+				selfState.modify:send(player, Channel.CHANNEL_STAGE)
 				otherState.modify = selfState.modify
 			end
 		end
@@ -125,9 +118,11 @@ function InstanceState.MapState:send(player)
 		end
 
 		if otherState.transform ~= transform then
-			transform:send(player)
+			transform:send(player, Channel.CHANNEL_STAGE)
 		end
 	end
+
+	RPC('tick', 0):send(player, Channel.CHANNEL_STAGE)
 end
 
 function InstanceState.ActorState:new()
@@ -286,13 +281,53 @@ function InstanceState.ActorState:onHUDMessage(message, ...)
 			...))
 end
 
+function InstanceState.ActorState:tick(actor)
+	if actor:getActionSourceID() ~= self.source then
+		self.source = actor:getActionSourceID()
+		local actions = actor:getActions()
+
+		local a = {}
+		for i = 1, #actions do
+			table.insert(a, {
+				id = actions[i].id,
+				type = actions[i].type,
+				verb = actions[i].verb
+			})
+		end
+
+		self.actions = RPC('_setActions', self.id, a)
+	end
+
+	if actor:getName() ~= self.name then
+		self.name = RPC('_setName', self.id, actor:getName())
+	end
+
+	do
+		local min, max = actor:getBounds()
+		self.bounds = RPC('_setBounds',
+			self.id,
+			{ x = min.x, y = min.y, z = min.z },
+			{ x = max.x, y = max.y, z = max.z })
+	end
+
+	do
+		local min, max = actor:getBounds()
+		self.tile = RPC('_setTile', self.id, actor:getTile())
+	end
+
+	self.hitpoints = RPC('_setHitpoints', actor:getCurrentHitpoints(), actor:getMaximumHitpoints())
+
+	self.messages = {}
+	self.damage = {}
+end
+
 function InstanceState.ActorState:send(player)
 	local state = player:getState()
 	local actor = state.actors[self.id]
 
 	if not actor and self.id then
 		if self.spawn and self:getIsAlive() then
-			player:send(self.spawn)
+			self.spawn:send(player, Channel.CHANNEL_ACTOR)
 		end
 
 		actor = {
@@ -305,7 +340,43 @@ function InstanceState.ActorState:send(player)
 	end
 
 	if not self:getIsAlive() then
-		player:send('onKilled', self.id)
+		RPC('onKilled', self.id):send(player, Channel.CHANNEL_ACTOR)
+	end
+
+	if self.position ~= actor.position and self.position then
+		self.position:send(player, Channel.CHANNEL_ACTOR)
+	end
+
+	if actor.actions ~= self.actions and self.actions then
+		self.actions:send(player, Channel.CHANNEL_ACTOR)
+	end
+
+	if actor.name ~= self.name and self.name then
+		self.name:send(player, Channel.CHANNEL_ACTOR)
+	end
+
+	if actor.direction ~= self.direction and self.direction then
+		self.direction:send(player, Channel.CHANNEL_ACTOR)
+	end
+
+	if actor.bounds ~= self.bounds and self.bounds then
+		self.bounds:send(player, Channel.CHANNEL_ACTOR)
+	end
+
+	if actor.hitpoints ~= self.hitpoints and self.hitpoints then
+		self.hitpoints:send(player, Channel.CHANNEL_ACTOR)
+	end
+
+	if actor.tile ~= self.tile and self.tile then
+		self.tile:send(player, Channel.CHANNEL_ACTOR)
+	end
+
+	for i = 1, #self.damage do
+		self.damage[i]:send(player, Channel.CHANNEL_ACTOR)
+	end
+
+	for i = 1, #self.messages do
+		self.messages[i]:send(player, Channel.CHANNEL_ACTOR)
 	end
 
 	for slot, animation in pairs(actor.animations) do
@@ -320,9 +391,9 @@ function InstanceState.ActorState:send(player)
 						animation.priority,
 						{ type = animation.animation:getResourceTypeID(), filename = animation.animation:getFilename() },
 						time)
-					rpc:send(player)
+					rpc:send(player, Channel.CHANNEL_ACTOR)
 				else
-					animation.rpc:send(player)
+					animation.rpc:send(player, Channel.CHANNEL_ACTOR)
 				end
 			end
 		end
@@ -347,7 +418,7 @@ function InstanceState.ActorState:send(player)
 					slot,
 					false,
 					{ type = selfSkin.skin:getResourceTypeID(), filename = selfSkin.skin:getFilename() })
-				rpc:send(player)
+				rpc:send(player, Channel.CHANNEL_ACTOR)
 				table.insert(removed, index)
 			end
 		end
@@ -368,7 +439,7 @@ function InstanceState.ActorState:send(player)
 			end
 
 			if not hasSkin then
-				selfSkin.rpc:send(player)
+				selfSkin.rpc:send(player, Channel.CHANNEL_ACTOR)
 			end
 		end
 	end
@@ -472,6 +543,8 @@ function InstanceState:send(player)
 	for id, actor in pairs(self.actors) do
 		actor:send(player)
 	end
+
+	RPC('tick', 0):send(player, Channel.CHANNEL_ACTOR)
 end
 
 function InstanceState:tick()
@@ -479,6 +552,8 @@ function InstanceState:tick()
 	for id, actor in pairs(self.actors) do
 		if not actor:getIsAlive() then
 			table.insert(deadActors, id)
+		else
+			self.actors:tick(actor)
 		end
 	end
 

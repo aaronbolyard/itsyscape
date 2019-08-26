@@ -87,6 +87,10 @@ function ServerStage:connectActor(instance, actor)
 	actor.onHUDMessage:register(self._onActorHUDMessage, self, instance)
 end
 
+function ServerStage:getInstance(instanceName)
+	return self.instances[instanceName]
+end
+
 function ServerStage:_onLoadMap(instance, map, layer, tileSetID, filename)
 	local state = self.state[instance]
 	state:onLoadMap(map, layer, tileSetID, filename)
@@ -419,25 +423,42 @@ function ServerStage:preloadStaticInstance(path)
 	return instance
 end
 
+function ServerStage:spawnActor(actor, path, anchor)
+	local instanceName self:preloadInstance(path)
+	local instance = self.instances[instanceName]
+
+	if instance then
+		local success, actor = instance:spawnActor(actor, path)
+		if success then
+			actor:getPeep():listen('finalize', function(peep)
+				self:movePeep(peep, path, anchor)
+			end)
+		end
+
+		return success, actor
+	end
+end
+
 function ServerStage:movePeep(peep, path, anchor)
 	local from, to
 
+	local currentInstanceName
 	do
-		local currentInstanceName = peep:getLayerName()
+		currentInstanceName = peep:getLayerName()
 
 		local currentInstance =  self.instances[currentInstanceName]
-		if currentInstance then
+		if currentInstance and path ~= currentInstanceName then
 			currentInstance:moveActorFrom(peep)
 			from = currentInstance:getFilename()
-		end
 
-		if peep:hasBehavior(PlayerBehavior) then
-			local playerID = peep:getBehavior(PlayerBehavior).id
-			local player = self.game:getPlayer(playerID)
-			if player then
-				local players = self.players[currentInstanceName]
-				if players then
-					players[player] = nil
+			if peep:hasBehavior(PlayerBehavior) then
+				local playerID = peep:getBehavior(PlayerBehavior).id
+				local player = self.game:getPlayer(playerID)
+				if player then
+					local players = self.players[currentInstanceName]
+					if players then
+						players[player] = nil
+					end
 				end
 			end
 		end
@@ -447,7 +468,7 @@ function ServerStage:movePeep(peep, path, anchor)
 		local newInstanceName = self:preloadInstance(path)
 
 		local newInstance = self.instances[newInstanceName]
-		if newInstance then
+		if newInstance and newInstanceName ~= currentInstanceName then
 			newInstance:moveActorTo(peep)
 			to = newInstance:getFilename()
 		end
@@ -486,7 +507,7 @@ function ServerStage:movePeep(peep, path, anchor)
 			end
 		end
 
-		if peep:hasBehavior(PlayerBehavior) then
+		if peep:hasBehavior(PlayerBehavior) and path ~= newInstanceName then
 			local playerID = peep:getBehavior(PlayerBehavior).id
 			local player = self.game:getPlayer(playerID)
 			if player then

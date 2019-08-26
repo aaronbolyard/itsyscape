@@ -38,7 +38,9 @@ function Instance:new(game, stage, path)
 	self.game = game
 	self.stage = stage
 	self.actors = {}
+	self.actorsByID = {}
 	self.props = {}
+	self.propsByID = {}
 	self.peeps = {}
 	self.decorations = {}
 	self.map = {}
@@ -200,6 +202,7 @@ function Instance:spawnActor(actorID, layer)
 		self.onActorSpawned(self, realID, actor)
 
 		self.actors[actor] = true
+		self.actorsByID[actorID] = actor
 
 		local peep = actor:getPeep()
 		self.peeps[actor] = peep
@@ -228,6 +231,7 @@ function LocalStage:moveActorTo(actor)
 		self.peeps[actor] = peep
 		self.peeps[peep] = actor
 		self.actors[actor] = true
+		self.actorsByID[actor:getID()] = actor
 
 		local position = peep:getBehavior(PositionBehavior)
 		if position then
@@ -247,6 +251,7 @@ function LocalStage:moveActorFrom(actor)
 		self.peeps[peep] = nil
 
 		self.actors[actor] = nil
+		self.actorsByID[actor:getID()] = nil
 	end
 end
 
@@ -256,6 +261,8 @@ function Instance:killActor(actor)
 			actor = self.peeps[actor]
 		end
 
+		local id = actor:getID()
+
 		self.onActorKilled(self, actor)
 		actor:depart()
 
@@ -264,6 +271,7 @@ function Instance:killActor(actor)
 		self.peeps[peep] = nil
 
 		self.actors[actor] = nil
+		self.actorsByID[id] = nil
 	end
 end
 
@@ -279,6 +287,7 @@ function Instance:placeProp(propID, layer)
 		self.onPropPlaced(self, realID, prop)
 
 		self.props[prop] = true
+		self.propsByID[prop] = prop
 
 		local peep = prop:getPeep()
 		self.peeps[prop] = peep
@@ -303,6 +312,8 @@ function Instance:removeProp(prop)
 			prop = self.peeps[prop]
 		end
 
+		local id = prop:getID()
+
 		self.onPropRemoved(self, prop)
 		prop:remove()
 
@@ -311,6 +322,7 @@ function Instance:removeProp(prop)
 		self.peeps[peep] = nil
 
 		self.props[prop] = nil
+		self.propsByID[prop] = nil
 	end
 end
 
@@ -954,8 +966,16 @@ function Instance:decorate(group, decoration, layer)
 	self.decorations[group] = decoration
 end
 
+function Instance:getActor(key)
+	return self.actors[key]
+end
+
 function Instance:iterateActors()
 	return pairs(self.actors)
+end
+
+function Instance:getProp(key)
+	return self.actors[key]
 end
 
 function Instance:iterateProps()

@@ -47,7 +47,8 @@ function Dispatch:tick()
 					if not s then
 						Log.warn("Failed to execute packet: %s", e)
 					else
-						self:dispatch(event.peer, s)
+						event.data = s
+						self:dispatch(event.peer, event)
 					end
 				end
 
@@ -70,15 +71,15 @@ end
 function Dispatch:dispatch(peer, event)
 	local data = event.data
 
-	if data._channel = Channel.CHANNEL_GAME then
+	if event.channel = Channel.CHANNEL_GAME then
 		self:dispatchGame(peer, event)
-	elseif data._channel = Channel.CHANNEL_PLAYER then
+	elseif event.channel = Channel.CHANNEL_PLAYER then
 		self:dispatchPlayer(peer, event)
-	elseif data._channel = Channel.CHANNEL_STAGE then
+	elseif event.channel = Channel.CHANNEL_STAGE then
 		self:dispatchStage(peer, event)
-	elseif data._channel = Channel.CHANNEL_ACTOR then
+	elseif event.channel = Channel.CHANNEL_ACTOR then
 		self:dispatchActor(peer, event)
-	elseif data._channel = Channel.CHANNEL_PROP then
+	elseif event.channel = Channel.CHANNEL_PROP then
 		self:dispatchProp(peer, event)
 	end
 end
@@ -130,7 +131,7 @@ function Dispatch.Player:walk(game, id, peer, i, j)
 	end
 end
 
-function Dispatch.Stage = {}
+Dispatch.Stage = {}
 function Dispatch.Stage:takeItem(game, id, peer, i, j, layer, ref)
 	i = tonumber(i)
 	j = tonumber(j)
@@ -143,7 +144,41 @@ function Dispatch.Stage:takeItem(game, id, peer, i, j, layer, ref)
 	end
 end
 
-function Dispatch.
+Dispatch.Actor = {}
+function Dispatch.Actor:poke(game, id, peer, actionID, scope)
+	actionID = tonumber(actionID)
+	scope = tostring(scope)
+
+	local player = self.players[peer:connect_id()]
+	if player and actionID and scope then
+		local layer = player:getActor():getPeep():getLayerName()
+		local instance = game:getStage():getInstance(layer)
+		if instance then
+			local actor = instance:getActor(id)
+			if actor then
+				actor:poke(actionID, scope)
+			end
+		end
+	end
+end
+
+Dispatch.Prop = {}
+function Dispatch.Prop:poke(game, id, peer, actionID, scope)
+	actionID = tonumber(actionID)
+	scope = tostring(scope)
+
+	local player = self.players[peer:connect_id()]
+	if player and actionID and scope then
+		local layer = player:getActor():getPeep():getLayerName()
+		local instance = game:getStage():getInstance(layer)
+		if instance then
+			local prop = instance:getProp(id)
+			if prop then
+				prop:poke(actionID, scope)
+			end
+		end
+	end
+end
 
 function Dispatch:dispatchGame(peer, event)
 	if event.type == 'RPC' then

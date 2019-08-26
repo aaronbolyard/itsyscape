@@ -80,6 +80,8 @@ Application.CLICK_DURATION = 0.25
 Application.CLICK_RADIUS = 32
 
 function Application:new()
+	BaseApplication.new(self)
+
 	self.camera = ThirdPersonCamera()
 	do
 		self.camera:setDistance(30)

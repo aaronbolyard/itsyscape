@@ -23,9 +23,9 @@ local ServerPlayer = Class(Player)
 -- Constructs a new player.
 --
 -- The Actor isn't created until ServerPlayer.spawn is called.
-function ServerPlayer:new(game, stage)
+function ServerPlayer:new(game, index)
 	self.game = game
-	self.stage = stage
+	self.index = index
 	self.actor = false
 	self.peer = false
 	self.state = {}
@@ -44,31 +44,37 @@ function ServerPlayer:getState()
 end
 
 function ServerPlayer:spawn()
-	local success, actor = self.stage:spawnActor("Resources.Game.Peeps.Player.One")
+	local storage = self.game:getDirector():getServerPlayerStorage(self.id):getRoot()
+
+	local path, anchor
+	if storage:hasSection("Location") then
+		local location = storage:getSection("Location")
+
+		path = storage:get("name")
+		anchor = Vector(
+			location:get("x"),
+			location:get("y"),
+			location:get("z"))
+	end
+	
+	if not path then
+		path = "@Ship_IsabelleIsland_PortmasterJenkins?" ..
+			"map=IsabelleIsland_FarOcean," ..
+			"jenkins_state=1," ..
+			"i=16," ..
+			"j=16," ..
+			"shore=IsabelleIsland_Tower," ..
+			"shoreAnchor=Anchor_StartGame"
+		anchor = "Anchor_Spawn"
+	end
+
+	local success, actor = self.stage:spawnActor("Resources.Game.Peeps.Player.One", path, anchor)
 	if success then
 		self.actor = actor
-		actor:getPeep():addBehavior(ServerPlayerBehavior)
+		actor:getPeep():addBehavior(PlayerBehavior)
 
-		local p = actor:getPeep():getBehavior(ServerPlayerBehavior)
-		p.id = 1
-
-		actor:getPeep():listen('finalize', function()
-			local storage = self.game:getDirector():getServerPlayerStorage(1):getRoot()
-			if storage:hasSection("Location") then
-				local location = storage:getSection("Location")
-				if location:get("name") then
-					self.stage:movePeep(
-						actor:getPeep(),
-						location:get("name"),
-						Vector(
-							location:get("x"),
-							location:get("y"),
-							location:get("z")),
-						true)
-					return
-				end
-			end
-		end)
+		local p = actor:getPeep():getBehavior(PlayerBehavior)
+		p.id = self.id
 	else
 		self.actor = false
 	end
@@ -76,7 +82,12 @@ end
 
 function ServerPlayer:poof()
 	if self.actor then
-		self.stage:killActor(self.actor)
+		local peep = self.actor:getPeep()
+		local instance = self.stage:getInstance(peep:getLayerName())
+
+		if instance then
+			instance:killActor(self.actor)
+		end
 	end
 
 	self.actor = false
