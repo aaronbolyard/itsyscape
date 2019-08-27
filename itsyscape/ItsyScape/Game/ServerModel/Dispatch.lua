@@ -71,15 +71,15 @@ end
 function Dispatch:dispatch(peer, event)
 	local data = event.data
 
-	if event.channel = Channel.CHANNEL_GAME then
+	if event.channel == Channel.CHANNEL_GAME then
 		self:dispatchGame(peer, event)
-	elseif event.channel = Channel.CHANNEL_PLAYER then
+	elseif event.channel == Channel.CHANNEL_PLAYER then
 		self:dispatchPlayer(peer, event)
-	elseif event.channel = Channel.CHANNEL_STAGE then
+	elseif event.channel == Channel.CHANNEL_STAGE then
 		self:dispatchStage(peer, event)
-	elseif event.channel = Channel.CHANNEL_ACTOR then
+	elseif event.channel == Channel.CHANNEL_ACTOR then
 		self:dispatchActor(peer, event)
-	elseif event.channel = Channel.CHANNEL_PROP then
+	elseif event.channel == Channel.CHANNEL_PROP then
 		self:dispatchProp(peer, event)
 	end
 end

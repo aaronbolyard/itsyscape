@@ -11,7 +11,7 @@ local Class = require "ItsyScape.Common.Class"
 local Game = require "ItsyScape.Game.Model.Game"
 local ServerPlayer = require "ItsyScape.Game.ServerModel.Player"
 local ServerStage = require "ItsyScape.Game.ServerModel.Stage"
-local ServerUI = require "ItsyScape.Game.ServerModel.UI"
+--local ServerUI = require "ItsyScape.Game.ServerModel.UI"
 local ItsyScapeDirector = require "ItsyScape.Game.ItsyScapeDirector"
 
 local ServerGame = Class(Game)
@@ -24,7 +24,7 @@ function ServerGame:new(gameDB)
 	self.stage = ServerStage(self)
 	self.players = {}
 	self.currentPlayerIndex = 1
-	self.ui = ServerUI(self)
+	--self.ui = ServerUI(self)
 	self.director = ItsyScapeDirector(self, gameDB)
 	self.ticks = 0
 

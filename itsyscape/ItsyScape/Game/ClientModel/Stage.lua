@@ -13,6 +13,7 @@ local Quaternion = require "ItsyScape.Common.Math.Quaternion"
 local Stage = require "ItsyScape.Game.Model.Stage"
 local ClientActor = require "ItsyScape.Game.ClientModel.Actor"
 local Channel = require "ItsyScape.Game.ServerModel.Channel"
+local Decoration = require "ItsyScape.Graphics.Decoration"
 
 local ClientStage = Class(Stage)
 
@@ -122,4 +123,8 @@ function ClientStage:dispatch(channel, event)
 			func(self, unpack(event.n, event))
 		end
 	elseif channel == Channel.CHANNEL_ACTOR then
-		local func = ClientStage.
+		self:onActorX(event)
+	end
+end
+
+return ClientStage

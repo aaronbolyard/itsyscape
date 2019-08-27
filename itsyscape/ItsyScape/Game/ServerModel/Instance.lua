@@ -221,7 +221,7 @@ function Instance:spawnActor(actorID, layer)
 	return false, nil
 end
 
-function LocalStage:moveActorTo(actor)
+function Instance:moveActorTo(actor)
 	if actor and (self.actors[actor] or self.peeps[actor]) then
 		if actor:isCompatibleType(Peep) then
 			actor = self.peeps[actor]
@@ -240,7 +240,7 @@ function LocalStage:moveActorTo(actor)
 	end
 end
 
-function LocalStage:moveActorFrom(actor)
+function Instance:moveActorFrom(actor)
 	if actor and (self.actors[actor] or self.peeps[actor]) then
 		if actor:isCompatibleType(Peep) then
 			actor = self.peeps[actor]
@@ -596,9 +596,7 @@ function Instance:loadMapResource(filename, args)
 	end
 
 	local layer = self.stage:getNewLayer()
-	self.layer = layer
-
-	self:loadMapFromFile(directoryPath .. "/1.lmap", , meta[1])
+	self:loadMapFromFile(directoryPath .. "/1.lmap", layer, meta[1])
 
 	do
 		local waterDirectoryPath = directoryPath .. "/Water"
