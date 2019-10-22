@@ -55,6 +55,8 @@ end
 function ServerApplication:update(delta)
 	self.game:update(delta)
 	self.dispatch:tick()
+
+	self:tick()
 end
 
 function ServerApplication:tick()

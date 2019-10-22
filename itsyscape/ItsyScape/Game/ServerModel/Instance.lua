@@ -51,10 +51,9 @@ function Instance:new(game, stage, path)
 	self.music = {}
 	self.filename = ""
 	self.playerCount = 0
+	self.grounds = {}
 
 	self:load(path)
-
-	self.grounds = {}
 	self:spawnGround(self.layerName, 1)
 
 	self.mapThread = love.thread.newThread("ItsyScape/Game/LocalModel/Threads/Map.lua")
@@ -516,7 +515,7 @@ end
 
 function Instance:unloadAll()
 	do
-		self.game:getDirector():getItemBroker():toStorage()
+		--self.game:getDirector():getItemBroker():toStorage()
 	end
 
 	local layers = self:getInstances()
@@ -775,10 +774,6 @@ function Instance:getInstances()
 
 	table.sort(layers)
 	return layers
-end
-
-function Instance:getGravity()
-	return self.gravity
 end
 
 function Instance:setGravity(value)

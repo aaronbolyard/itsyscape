@@ -10,6 +10,8 @@
 local enet = require "enet"
 local Class = require "ItsyScape.Common.Class"
 local Game = require "ItsyScape.Game.Model.Game"
+local ClientStage = require "ItsyScape.Game.ClientModel.Stage"
+local ClientPlayer = require "ItsyScape.Game.ClientModel.Player"
 local Channel = require "ItsyScape.Game.ServerModel.Channel"
 local RPC = require "ItsyScape.Game.ServerModel.RPC"
 
@@ -26,39 +28,23 @@ function ClientGame:new(address, playerStorage)
 
 	self.server = enet.host_create()
 	self.peer = self.server:connect(address)
+
+	self.stage = ClientStage(self)
+	self.player = ClientPlayer(self)
+
+	self.ticks = {}
+end
+
+function ClientGame:getStage()
+	return self.stage
+end
+
+function ClientGame:getPlayer()
+	return self.player
 end
 
 function ClientGame:getIsConnected()
 	return self.isConnected
-end
-
-function ClientGame:tick()
-	local event = self.server:service(0)
-	while event do
-		if event == 'connect' then
-			self:connect()
-		elseif event == 'disconnect' then
-			self:disconnect()
-		else
-			local s, e
-
-			s, e = loadstring(event)
-			if not s then
-				Log.warn("Bad packet: %s", e)
-			else
-				local func = setfenv(s, {})
-				s, e = pcall(func)
-				if not s then
-					Log.warn("Failed to execute packet: %s", e)
-				else
-					event.data = s
-					self:dispatch(event)
-				end
-			end
-
-			event = self.host:service()
-		end
-	end
 end
 
 function ClientGame:connect()
@@ -87,9 +73,42 @@ function ClientGame:getShouldTick()
 	return hasTick
 end
 
+function ClientGame:getTicks()
+	return 10
+end
+
 function ClientGame:tick()
 	for _, index in pairs(Channel) do
-		self.ticks[index] = self.ticks[index] - 1
+		self.ticks[index] = math.max((self.ticks[index] or 0) - 1, 0)
+	end
+end
+
+function ClientGame:update()
+	local event = self.server:service(0)
+	while event do
+		if event.type == 'connect' then
+			self:connect()
+		elseif event.type == 'disconnect' then
+			self:disconnect()
+		else
+			local s, e
+
+			s, e = pcall(loadstring, event.data)
+			if not s then
+				Log.warn("Bad packet: %s", e)
+			else
+				local func = setfenv(e, {})
+				s, e = pcall(func)
+				if not s then
+					Log.warn("Failed to execute packet: %s", e)
+				else
+					event.data = s
+					self:dispatch(event)
+				end
+			end
+		end
+
+		event = self.server:service()
 	end
 end
 

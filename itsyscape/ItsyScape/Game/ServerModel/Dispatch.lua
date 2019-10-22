@@ -31,29 +31,29 @@ function Dispatch:tick()
 		local difference = targetTime - currentTime
 		local event = self.host:service(difference)
 		while event do
-			if event == 'connect' then
+			if event.type == 'connect' then
 				self:connect(event.peer)
-			elseif event == 'disconnect' then
+			elseif event.type == 'disconnect' then
 				self:disconnect(event.peer)
 			else
 				local s, e
 
-				s, e = loadstring(event)
+				s, e = pcall(loadstring, event.data)
 				if not s then
 					Log.warn("Bad packet: %s", e)
 				else
-					local func = setfenv(s, {})
+					local func = setfenv(e, {})
 					s, e = pcall(func)
 					if not s then
 						Log.warn("Failed to execute packet: %s", e)
 					else
-						event.data = s
+						event.data = e
 						self:dispatch(event.peer, event)
 					end
 				end
-
-				event = self.host:service()
 			end
+
+			event = self.host:service()
 		end
 
 		currentTime = love.timer.getTime()
@@ -61,10 +61,11 @@ function Dispatch:tick()
 end
 
 function Dispatch:connect(peer)
-	-- Nothing.
+	Log.info('Peer connected.')
 end
 
 function Dispatch:disconnect(peer)
+	Log.info('Peer disconnected.')
 	Dispatch.Game.disconnect(self, self.game, peer)
 end
 
@@ -85,10 +86,10 @@ function Dispatch:dispatch(peer, event)
 end
 
 function Dispatch:rpc(dispatch, obj, peer, event)
-	local data = event.data
+	local data = event.data.data
 	local func = dispatch[data.call]
 	if func then
-		func(self, obj, data.id, peer, unpack(data.n, data))
+		func(self, obj, data.id, peer, unpack(data, data.n))
 	else
 		Log.warn('Unknown RPC: %s', data.call)
 	end
@@ -181,7 +182,7 @@ function Dispatch.Prop:poke(game, id, peer, actionID, scope)
 end
 
 function Dispatch:dispatchGame(peer, event)
-	if event.type == 'RPC' then
+	if event.data.action == 'RPC' then
 		self:rpc(Dispatch.Game, self.game, peer, event)
 	end
 end

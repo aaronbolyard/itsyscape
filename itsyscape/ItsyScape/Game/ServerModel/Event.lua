@@ -26,7 +26,11 @@ function Event:serialize(action, t)
 end
 
 function Event:send(player, channel)
-	player:getPeer():send(self.data, channel)
+	if Class.isType(player, require "ItsyScape.Game.ServerModel.Player") then
+		player:getPeer():send(self.data, channel)
+	else
+		player:send(self.data, channel)
+	end
 end
 
 function Metatable.__eq(a, b)

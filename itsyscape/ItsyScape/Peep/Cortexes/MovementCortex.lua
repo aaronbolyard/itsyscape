@@ -58,7 +58,6 @@ end
 function MovementCortex:update(delta)
 	local game = self:getDirector():getGameInstance()
 	local gravity = game:getStage():getGravity()
-	local map = game:getStage():getMap()
 
 	local multiplier = 1 + (game:getTicks() - 10) / 200
 

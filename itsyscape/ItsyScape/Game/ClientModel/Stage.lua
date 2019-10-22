@@ -74,11 +74,11 @@ function ClientStage.RPC:onStopMusic(track)
 	self:onStopMusic(track)
 end
 
-function InstanceState:onProjectile(projectileID, source, destination)
+function ClientStage:onProjectile(projectileID, source, destination)
 	-- TODO
 end
 
-function InstanceState:onDecorate(key, decoration, layer, filename)
+function ClientStage:onDecorate(key, decoration, layer, filename)
 	if filename then
 		self:onDecorate(key, Decoration(filename), layer)
 	else
@@ -111,6 +111,8 @@ function ClientStage.RPC:onActorX(event)
 end
 
 function ClientStage:new(game)
+	Stage.new(self)
+
 	self.game = game
 	self.maps = {}
 	self.actors = {}

@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- ItsyScape/Game/LocalModel/Player.lua
+-- ItsyScape/Game/ServerModel/Player.lua
 --
 -- This file is a part of ItsyScape.
 --
@@ -25,6 +25,7 @@ local ServerPlayer = Class(Player)
 -- The Actor isn't created until ServerPlayer.spawn is called.
 function ServerPlayer:new(game, index)
 	self.game = game
+	self.stage = game:getStage()
 	self.index = index
 	self.actor = false
 	self.peer = false
@@ -44,7 +45,7 @@ function ServerPlayer:getState()
 end
 
 function ServerPlayer:spawn()
-	local storage = self.game:getDirector():getServerPlayerStorage(self.id):getRoot()
+	local storage = self.game:getDirector():getPlayerStorage(self.index):getRoot()
 
 	local path, anchor
 	if storage:hasSection("Location") then
@@ -74,7 +75,7 @@ function ServerPlayer:spawn()
 		actor:getPeep():addBehavior(PlayerBehavior)
 
 		local p = actor:getPeep():getBehavior(PlayerBehavior)
-		p.id = self.id
+		p.id = self.index
 	else
 		self.actor = false
 	end
@@ -127,4 +128,4 @@ function ServerPlayer:walk(i, j, k)
 	return Utility.Peep.walk(peep, i, j, k, math.huge, { asCloseAsPossible = true })
 end
 
-return Player
+return ServerPlayer

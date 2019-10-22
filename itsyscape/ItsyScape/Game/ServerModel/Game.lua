@@ -53,6 +53,8 @@ function ServerGame:spawnPlayer(playerStorage)
 	self.players[index] = player
 	table.insert(self.pendingPlayers, player)
 
+	Log.info('Spawned player.')
+
 	return player
 end
 
@@ -94,7 +96,7 @@ function ServerGame:tick()
 	self.ticks = self.ticks + 1
 	self.stage:tick()
 	self.director:update(self:getDelta())
-	self.ui:update(self:getDelta())
+	--self.ui:update(self:getDelta())
 end
 
 function ServerGame:update(delta)

@@ -8,6 +8,7 @@
 -- file, You can obtain one at http://mozilla.org/MPL/2.0/.
 --------------------------------------------------------------------------------
 local Class = require "ItsyScape.Common.Class"
+local Vector = require "ItsyScape.Common.Math.Vector"
 local Stage = require "ItsyScape.Game.Model.Stage"
 local Event = require "ItsyScape.Game.ServerModel.Event"
 local Instance = require "ItsyScape.Game.ServerModel.Instance"
@@ -20,6 +21,7 @@ local ServerStage = Class(Stage)
 function ServerStage:new(game)
 	Stage.new(self)
 
+	self.game = game
 	self.currentPropID = 1
 	self.currentActorID = 1
 	self.currentLayerID = 1
@@ -30,6 +32,12 @@ function ServerStage:new(game)
 	self.state = {}
 
 	self.players = {}
+
+	self.gravity = Vector(0, -9.8, 0)
+end
+
+function ServerStage:getGravity()
+	return self.gravity
 end
 
 function ServerStage:preloadInstance(path)
