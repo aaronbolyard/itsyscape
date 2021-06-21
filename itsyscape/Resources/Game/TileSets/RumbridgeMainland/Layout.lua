@@ -28,7 +28,10 @@
 		y = 768,
 		width = 128,
 		height = 128,
-		name = "wood"
+		name = "sand",
+
+		['dig-resource-id'] = "BucketOfSand",
+		['dig-resource-type'] = "Item"
 	},
 
 	{
@@ -36,7 +39,7 @@
 		y = 896,
 		width = 128,
 		height = 128,
-		name = "dirt.road.tl"
+		name = "grass.edge.tl"
 	},
 
 	{
@@ -44,7 +47,7 @@
 		y = 896,
 		width = 128,
 		height = 128,
-		name = "dirt.road.tm"
+		name = "grass.edge.tm"
 	},
 
 	{
@@ -52,7 +55,15 @@
 		y = 896,
 		width = 128,
 		height = 128,
-		name = "dirt.road.tr"
+		name = "grass.edge.tr"
+	},
+
+	{
+		x = 256,
+		y = 768,
+		width = 128,
+		height = 128,
+		name = "grass.edge.ml"
 	},
 
 	{
@@ -60,15 +71,7 @@
 		y = 768,
 		width = 128,
 		height = 128,
-		name = "dirt.road.ml"
-	},
-
-	{
-		x = 512,
-		y = 768,
-		width = 128,
-		height = 128,
-		name = "dirt.road.mr"
+		name = "grass.edge.mr"
 	},
 
 	{
@@ -76,7 +79,7 @@
 		y = 640,
 		width = 128,
 		height = 128,
-		name = "dirt.road.bl"
+		name = "grass.edge.bl"
 	},
 
 	{
@@ -84,7 +87,7 @@
 		y = 640,
 		width = 128,
 		height = 128,
-		name = "dirt.road.bm"
+		name = "grass.edge.bm"
 	},
 
 	{
@@ -92,31 +95,7 @@
 		y = 640,
 		width = 128,
 		height = 128,
-		name = "dirt.road.br"
-	},
-
-	{
-		x = 256,
-		y = 512,
-		width = 128,
-		height = 128,
-		name = "blue.hrug.l"
-	},
-
-	{
-		x = 384,
-		y = 512,
-		width = 128,
-		height = 128,
-		name = "blue.hrug.m"
-	},
-
-	{
-		x = 512,
-		y = 512,
-		width = 128,
-		height = 128,
-		name = "blue.hrug.r"
+		name = "grass.edge.br"
 	},
 
 	{
@@ -124,7 +103,23 @@
 		y = 896,
 		width = 128,
 		height = 128,
-		name = "blue.vrug.t"
+		name = "sand.edge.tl"
+	},
+
+	{
+		x = 768,
+		y = 896,
+		width = 128,
+		height = 128,
+		name = "sand.edge.tm"
+	},
+
+	{
+		x = 896,
+		y = 896,
+		width = 128,
+		height = 128,
+		name = "sand.edge.tr"
 	},
 
 	{
@@ -132,7 +127,15 @@
 		y = 768,
 		width = 128,
 		height = 128,
-		name = "blue.vrug.m"
+		name = "sand.edge.ml"
+	},
+
+	{
+		x = 896,
+		y = 768,
+		width = 128,
+		height = 128,
+		name = "sand.edge.mr"
 	},
 
 	{
@@ -140,7 +143,151 @@
 		y = 640,
 		width = 128,
 		height = 128,
-		name = "blue.vrug.b"
+		name = "sand.edge.bl"
+	},
+
+	{
+		x = 768,
+		y = 640,
+		width = 128,
+		height = 128,
+		name = "sand.edge.bm"
+	},
+
+	{
+		x = 896,
+		y = 640,
+		width = 128,
+		height = 128,
+		name = "sand.edge.br"
+	},
+
+	{
+		x = 640,
+		y = 512,
+		width = 128,
+		height = 128,
+		name = "brick.edge.tl"
+	},
+
+	{
+		x = 768,
+		y = 512,
+		width = 128,
+		height = 128,
+		name = "brick.edge.tm"
+	},
+
+	{
+		x = 896,
+		y = 512,
+		width = 128,
+		height = 128,
+		name = "brick.edge.tr"
+	},
+
+	{
+		x = 640,
+		y = 384,
+		width = 128,
+		height = 128,
+		name = "brick.edge.ml"
+	},
+
+	{
+		x = 896,
+		y = 384,
+		width = 128,
+		height = 128,
+		name = "brick.edge.mr"
+	},
+
+	{
+		x = 640,
+		y = 256,
+		width = 128,
+		height = 128,
+		name = "brick.edge.bl"
+	},
+
+	{
+		x = 768,
+		y = 256,
+		width = 128,
+		height = 128,
+		name = "brick.edge.bm"
+	},
+
+	{
+		x = 896,
+		y = 256,
+		width = 128,
+		height = 128,
+		name = "brick.edge.br"
+	},
+
+	{
+		x = 256,
+		y = 512,
+		width = 128,
+		height = 128,
+		name = "cave_ground.edge.tl"
+	},
+
+	{
+		x = 384,
+		y = 512,
+		width = 128,
+		height = 128,
+		name = "cave_ground.edge.tm"
+	},
+
+	{
+		x = 512,
+		y = 512,
+		width = 128,
+		height = 128,
+		name = "cave_ground.edge.tr"
+	},
+
+	{
+		x = 256,
+		y = 384,
+		width = 128,
+		height = 128,
+		name = "cave_ground.edge.ml"
+	},
+
+	{
+		x = 512,
+		y = 384,
+		width = 128,
+		height = 128,
+		name = "cave_ground.edge.mr"
+	},
+
+	{
+		x = 256,
+		y = 256,
+		width = 128,
+		height = 128,
+		name = "cave_ground.edge.bl"
+	},
+
+	{
+		x = 384,
+		y = 256,
+		width = 128,
+		height = 128,
+		name = "cave_ground.edge.bm"
+	},
+
+	{
+		x = 512,
+		y = 256,
+		width = 128,
+		height = 128,
+		name = "cave_ground.edge.br"
 	},
 
 	{
@@ -148,7 +295,23 @@
 		y = 640,
 		width = 128,
 		height = 128,
-		name = "stone"
+		name = "wood"
+	},
+
+	{
+		x = 128,
+		y = 512,
+		width = 128,
+		height = 128,
+		name = "cave_ground"
+	},
+
+	{
+		x = 128,
+		y = 384,
+		width = 128,
+		height = 128,
+		name = "brick"
 	},
 
 	{
@@ -156,6 +319,121 @@
 		y = 512,
 		width = 128,
 		height = 256,
-		name = "stone_wall"
-	}
+		name = "brick_wall1"
+	},
+
+	{
+		x = 0,
+		y = 256,
+		width = 128,
+		height = 256,
+		name = "brick_wall2"
+	},
+
+	{
+		x = 128,
+		y = 256,
+		width = 128,
+		height = 128,
+		name = "invisible"
+	},
+
+	{
+		x = 640,
+		y = 512,
+		width = 128,
+		height = 128,
+		colorRed = 200,
+		colorGreen = 200,
+		colorBlue = 255,
+		name = "brick_blue.edge.tl"
+	},
+
+	{
+		x = 768,
+		y = 512,
+		width = 128,
+		height = 128,
+		colorRed = 200,
+		colorGreen = 200,
+		colorBlue = 255,
+		name = "brick_blue.edge.tm"
+	},
+
+	{
+		x = 896,
+		y = 512,
+		width = 128,
+		height = 128,
+		colorRed = 200,
+		colorGreen = 200,
+		colorBlue = 255,
+		name = "brick_blue.edge.tr"
+	},
+
+	{
+		x = 640,
+		y = 384,
+		width = 128,
+		height = 128,
+		colorRed = 200,
+		colorGreen = 200,
+		colorBlue = 255,
+		name = "brick_blue.edge.ml"
+	},
+
+	{
+		x = 896,
+		y = 384,
+		width = 128,
+		height = 128,
+		colorRed = 200,
+		colorGreen = 200,
+		colorBlue = 255,
+		name = "brick_blue.edge.mr"
+	},
+
+	{
+		x = 640,
+		y = 256,
+		width = 128,
+		height = 128,
+		colorRed = 200,
+		colorGreen = 200,
+		colorBlue = 255,
+		name = "brick_blue.edge.bl"
+	},
+
+	{
+		x = 768,
+		y = 256,
+		width = 128,
+		height = 128,
+		colorRed = 200,
+		colorGreen = 200,
+		colorBlue = 255,
+		name = "brick_blue.edge.bm"
+	},
+
+	{
+		x = 896,
+		y = 256,
+		width = 128,
+		height = 128,
+		colorRed = 200,
+		colorGreen = 200,
+		colorBlue = 255,
+		name = "brick_blue.edge.br"
+	},
+
+	{
+		x = 128,
+		y = 384,
+		width = 128,
+		height = 128,
+		colorRed = 200,
+		colorGreen = 200,
+		colorBlue = 255,
+		name = "brick_blue"
+	},
 }

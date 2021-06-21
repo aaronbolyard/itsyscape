@@ -449,9 +449,9 @@ end
 function GameView:decorate(group, decoration, layer)
 	local groupName = group .. '#' .. tostring(layer)
 	if self.decorations[groupName] and
-	   self.decorations[groupName].node
+	   self.decorations[groupName].sceneNode
 	then
-		self.decorations[groupName].node:setParent(nil)
+		self.decorations[groupName].sceneNode:setParent(nil)
 		self.decorations[groupName] = nil
 	end
 
