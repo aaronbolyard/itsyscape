@@ -113,18 +113,18 @@ ItsyScape.Meta.ResourceDescription {
 	Resource = ItsyScape.Resource.Peep "Nyarlathotep_Cutscene"
 }
 
-ItsyScape.Resource.Prop "Building_SistineOfSimulacrum" {
+ItsyScape.Resource.Prop "Building_SistineOfTheSimulacrum" {
 	-- Nothing
 }
 
 ItsyScape.Meta.PeepID {
 	Value = "Resources.Game.Peeps.Props.PassableProp",
-	Resource = ItsyScape.Resource.Prop "Building_SistineOfSimulacrum"
+	Resource = ItsyScape.Resource.Prop "Building_SistineOfTheSimulacrum"
 }
 
 ItsyScape.Meta.MapObjectSize {
 	SizeX = 0,
 	SizeY = 0,
 	SizeZ = 0,
-	MapObject = ItsyScape.Resource.Prop "Building_SistineOfSimulacrum"
+	MapObject = ItsyScape.Resource.Prop "Building_SistineOfTheSimulacrum"
 }

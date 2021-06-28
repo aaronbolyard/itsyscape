@@ -9,6 +9,7 @@
 --------------------------------------------------------------------------------
 local Class = require "ItsyScape.Common.Class"
 local Vector = require "ItsyScape.Common.Math.Vector"
+local Quaternion = require "ItsyScape.Common.Math.Quaternion"
 local CommandInstance = require "ItsyScape.Game.Animation.Commands.CommandInstance"
 local ParticleSceneNode = require "ItsyScape.Graphics.ParticleSceneNode"
 
@@ -40,8 +41,13 @@ end
 function ParticlesInstance:play(animatable, time)
 	if self.command then
 		local attach = self.command:getAttach()
+		local rotation = Quaternion[self.command:getRotation()]
 		if attach then
 			local transform = love.math.newTransform()
+
+			if rotation and Class.isCompatibleType(rotation, Quaternion) then
+				transform:applyQuaternion(rotation:get())
+			end
 
 			do
 				local transforms = animatable:getTransforms()

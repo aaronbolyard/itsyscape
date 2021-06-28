@@ -31,7 +31,36 @@ ItsyScape.Meta.ResourceDescription {
 
 ItsyScape.Meta.PeepStat {
 	Skill = ItsyScape.Resource.Skill "Constitution",
-	Value = ItsyScape.Utility.xpForLevel(100),
+	Value = ItsyScape.Utility.xpForLevel(500),
+	Resource = ItsyScape.Resource.Peep "Tinkerer"
+}
+
+ItsyScape.Meta.PeepStat {
+	Skill = ItsyScape.Resource.Skill "Defense",
+	Value = ItsyScape.Utility.xpForLevel(40),
+	Resource = ItsyScape.Resource.Peep "Tinkerer"
+}
+
+ItsyScape.Meta.PeepStat {
+	Skill = ItsyScape.Resource.Skill "Magic",
+	Value = ItsyScape.Utility.xpForLevel(50),
+	Resource = ItsyScape.Resource.Peep "Tinkerer"
+}
+
+ItsyScape.Meta.PeepStat {
+	Skill = ItsyScape.Resource.Skill "Wisdom",
+	Value = ItsyScape.Utility.xpForLevel(50),
+	Resource = ItsyScape.Resource.Peep "Tinkerer"
+}
+
+ItsyScape.Meta.Equipment {
+	AccuracyRanged = ItsyScape.Utility.styleBonusForWeapon(50),
+	DefenseStab = ItsyScape.Utility.styleBonusForItem(30, 0.4),
+	DefenseSlash = ItsyScape.Utility.styleBonusForItem(30, 1.1),
+	DefenseCrush = ItsyScape.Utility.styleBonusForItem(30, 1.1),
+	DefenseMagic = ItsyScape.Utility.styleBonusForItem(65, 1.3),
+	DefenseRanged = ItsyScape.Utility.styleBonusForItem(65, 1.2),
+	StrengthRanged = ItsyScape.Utility.strengthBonusForWeapon(35),
 	Resource = ItsyScape.Resource.Peep "Tinkerer"
 }
 

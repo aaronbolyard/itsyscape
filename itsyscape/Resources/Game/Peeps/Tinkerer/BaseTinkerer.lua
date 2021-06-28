@@ -58,6 +58,8 @@ function BaseTinkerer:ready(director, game)
 		"Resources/Game/Skins/Tinkerer/Tinkerer.lua")
 	actor:setSkin(Equipment.PLAYER_SLOT_BODY, 0, body)
 
+	Utility.Peep.equipXWeapon(self, "Tinkerer_Attack_Magic")
+
 	Creep.ready(self, director, game)
 end
 

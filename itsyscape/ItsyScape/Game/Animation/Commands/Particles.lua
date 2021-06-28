@@ -25,6 +25,7 @@ function Particles:new(t)
 	self.duration = t.duration or 0
 	self.particleSystem = t.system or {}
 	self.attach = t.attach or false
+	self.rotation = t.rotation or 'IDENTITY'
 end
 
 function Particles:getDuration()
@@ -49,6 +50,14 @@ end
 
 function Particles:setAttach(value)
 	self.attach = value
+end
+
+function Particles:getRotation()
+	return self.rotation
+end
+
+function Particles:setRotation(value)
+	self.rotation = value
 end
 
 function Particles:instantiate()
